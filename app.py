@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, io, csv, secrets
+import os, io, secrets
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
@@ -17,6 +17,7 @@ for d in [DATA_DIR, LOG_DIR, TOK_DIR]:
 
 MASTER_FILE = os.path.join(DATA_DIR, "master_orders.csv")
 TOK_FILE    = os.path.join(TOK_DIR, "tokens.csv")
+LOG_FILE    = os.path.join(LOG_DIR, "change_log.csv")
 
 OWNER_KEY      = st.secrets.get("OWNER_KEY", "admin12345")
 BASE_URL       = st.secrets.get("BASE_URL", "https://<app>.streamlit.app/")
@@ -32,7 +33,7 @@ st.set_page_config(
 
 # ---------------- UTILITIES ----------------
 def seed_data():
-    # create master_orders.csv if not exists
+    # Master Orders
     if not os.path.exists(MASTER_FILE):
         rows = []
         for wh in ["VIC","NSW","SA"]:
@@ -55,11 +56,17 @@ def seed_data():
                 })
         pd.DataFrame(rows).to_csv(MASTER_FILE, index=False)
 
-    # create tokens.csv if not exists
+    # Tokens
     if not os.path.exists(TOK_FILE):
         pd.DataFrame(
             columns=["token","role","company","expires_at","created_at"]
         ).to_csv(TOK_FILE, index=False)
+
+    # Logs
+    if not os.path.exists(LOG_FILE):
+        pd.DataFrame(
+            columns=["Timestamp","User","Warehouse","OrderID","FromStatus","ToStatus","FromInvoice","ToInvoice"]
+        ).to_csv(LOG_FILE, index=False)
 
 def load_master():
     return pd.read_csv(MASTER_FILE, dtype=str).fillna("")
